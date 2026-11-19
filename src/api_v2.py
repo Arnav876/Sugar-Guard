@@ -1,19 +1,28 @@
 """Flask API with error handling"""
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from datetime import datetime
 import json
 import traceback
+import os
 from src.database import Database
 from src.data_simulator import DataSimulator
 from src.risk_engine import RiskEngine
 
-app = Flask(__name__)
+template_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'templates'))
+app = Flask(__name__, template_folder=template_dir)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 db = Database()
 risk_engine = RiskEngine()
 user_monitor = {}
+
+@app.route('/', methods=['GET'])
+def index():
+    try:
+        return render_template('index.html')
+    except Exception:
+        return jsonify({'status': 'online', 'service': 'Sugar Guard API', 'health': '/api/health'})
 
 @app.route('/api/health', methods=['GET'])
 def health():
